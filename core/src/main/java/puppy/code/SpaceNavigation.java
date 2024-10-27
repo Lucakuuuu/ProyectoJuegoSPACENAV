@@ -5,14 +5,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-
-
-
 public class SpaceNavigation extends Game {
 	private String nombreJuego = "Space Navigation";
 	private SpriteBatch batch;
 	private BitmapFont font;
-	private int highScore;	
+	private int highScore;
 
 	public void create() {
 		highScore = 0;
@@ -47,7 +44,7 @@ public class SpaceNavigation extends Game {
 	public void setHighScore(int highScore) {
 		this.highScore = highScore;
 	}
-	
-	
+
+
 
 }
