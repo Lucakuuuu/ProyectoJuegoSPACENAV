@@ -1,50 +1,77 @@
 package puppy.code;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class SpaceNavigation extends Game {
-	private String nombreJuego = "Space Navigation";
-	private SpriteBatch batch;
-	private BitmapFont font;
-	private int highScore;
+    private static final String PREFS_NAME = "space_navigation_prefs";
+    private static final String HIGH_SCORE_KEY = "high_score";
 
-	public void create() {
-		highScore = 0;
-		batch = new SpriteBatch();
-		font = new BitmapFont(); // usa Arial font x defecto
-		font.getData().setScale(2f);
-		Screen ss = new PantallaMenu(this);
-		this.setScreen(ss);
-	}
+    private SpriteBatch batch;
+    private BitmapFont font;
+    private int highScore;
 
-	public void render() {
-		super.render(); // important!
-	}
+    public void create() {
+        batch = new SpriteBatch();
+        font = new BitmapFont(); // Usa Arial font por defecto
+        font.getData().setScale(2f);
 
-	public void dispose() {
-		batch.dispose();
-		font.dispose();
-	}
+        loadHighScore(); // Carga el high score al inicio
+        setScreen(new PantallaMenu(this)); // Muestra el menú principal
+    }
 
-	public SpriteBatch getBatch() {
-		return batch;
-	}
+    @Override
+    public void render() {
+        super.render();
+    }
 
-	public BitmapFont getFont() {
-		return font;
-	}
+    @Override
+    public void dispose() {
+        batch.dispose();
+        font.dispose();
+    }
 
-	public int getHighScore() {
-		return highScore;
-	}
+    public SpriteBatch getBatch() {
+        return batch;
+    }
 
-	public void setHighScore(int highScore) {
-		this.highScore = highScore;
-	}
+    public BitmapFont getFont() {
+        return font;
+    }
 
+    // Getter y Setter para el high score
+    public int getHighScore() {
+        return highScore;
+    }
 
+    public void setHighScore(int score) {
+        if (score > highScore) {
+            highScore = score;
+            saveHighScore();
+        }
+    }
 
+    // Métodos para guardar y cargar el high score usando Preferences
+    private void saveHighScore() {
+        Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
+        prefs.putInteger(HIGH_SCORE_KEY, highScore);
+        prefs.flush();
+    }
+
+    private void loadHighScore() {
+        Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
+        highScore = prefs.getInteger(HIGH_SCORE_KEY, 0); // Cargar o iniciar en 0 si no existe
+    }
+
+    // Método auxiliar para cambiar la pantalla
+    public void changeScreen(Screen newScreen) {
+        if (getScreen() != null) {
+            getScreen().dispose(); // Libera la pantalla actual
+        }
+        setScreen(newScreen); // Cambia a la nueva pantalla
+    }
 }

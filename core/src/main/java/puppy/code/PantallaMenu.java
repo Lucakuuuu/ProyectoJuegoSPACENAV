@@ -11,7 +11,7 @@ public class PantallaMenu implements Screen {
 
     private SpaceNavigation game;
     private OrthographicCamera camera;
-    private Texture tituloImagen;  // Textura para la imagen del título
+    private Texture tituloImagen;
 
     // Opciones del menú
     private String[] opciones = {"Jugar", "Aprender a jugar", "Cerrar Juego"};
@@ -34,7 +34,9 @@ public class PantallaMenu implements Screen {
         game.getBatch().begin();
 
         // Dibujar la imagen del título
-        game.getBatch().draw(tituloImagen, 250, 280, 700, 500); // Ajustar las posiciones y tamaños según sea necesario
+        if (tituloImagen != null) {
+            game.getBatch().draw(tituloImagen, 250, 450, 700, 250); // Ajustar según sea necesario
+        }
 
         // Dibujar las opciones del menú
         for (int i = 0; i < opciones.length; i++) {
@@ -47,11 +49,11 @@ public class PantallaMenu implements Screen {
         }
         game.getBatch().end();
 
-        // Navegar con las flechas
+        // Navegación de opciones con las teclas de flecha
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            seleccionActual = (seleccionActual - 1 + opciones.length) % opciones.length; // Ir hacia arriba
+            seleccionActual = (seleccionActual - 1 + opciones.length) % opciones.length;
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            seleccionActual = (seleccionActual + 1) % opciones.length; // Ir hacia abajo
+            seleccionActual = (seleccionActual + 1) % opciones.length;
         }
 
         // Seleccionar opción con Enter
@@ -62,11 +64,13 @@ public class PantallaMenu implements Screen {
                     dispose();
                     break;
                 case 1: // "Aprender a jugar"
-                    // Aquí podrías crear otra pantalla con instrucciones
-                    System.out.println("Mostrando instrucciones para jugar...");
+                    /* Se podría implementar una pantalla adicional para mostrar instrucciones
+                    game.setScreen(new PantallaInstrucciones(game));
+                    dispose();
                     break;
+                    */
                 case 2: // "Cerrar Juego"
-                    Gdx.app.exit(); // Cerrar el juego
+                    Gdx.app.exit();
                     break;
             }
         }
@@ -74,8 +78,10 @@ public class PantallaMenu implements Screen {
 
     @Override
     public void dispose() {
-        // Liberar los recursos de la imagen
-        tituloImagen.dispose();
+        // Liberar recursos si la imagen se ha cargado
+        if (tituloImagen != null) {
+            tituloImagen.dispose();
+        }
     }
 
     @Override

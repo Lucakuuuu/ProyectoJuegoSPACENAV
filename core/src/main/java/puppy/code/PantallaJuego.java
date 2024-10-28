@@ -41,7 +41,7 @@ public class PantallaJuego implements Screen {
 
         batch = game.getBatch();
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 640);
+        camera.setToOrtho(false, 1280, 720);
 
         // Cargar sonidos y música
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.ogg"));
@@ -76,7 +76,7 @@ public class PantallaJuego implements Screen {
         CharSequence str = "Vidas: " + nave.getVidas() + " Ronda: " + ronda;
         game.getFont().getData().setScale(2f);
         game.getFont().draw(batch, str, 10, 30);
-        game.getFont().draw(batch, "Score:" + this.score, Gdx.graphics.getWidth() - 150, 30);
+        game.getFont().draw(batch, "Score:" + this.score, Gdx.graphics.getWidth() - 130, 30);
         game.getFont().draw(batch, "HighScore:" + game.getHighScore(), Gdx.graphics.getWidth() / 2 - 100, 30);
     }
 
@@ -167,9 +167,7 @@ public class PantallaJuego implements Screen {
     }
 
     @Override
-    public void show() {
-        gameMusic.play();
-    }
+    public void show() {}
 
     @Override
     public void resize(int width, int height) {}
@@ -187,5 +185,14 @@ public class PantallaJuego implements Screen {
     public void dispose() {
         explosionSound.dispose();
         gameMusic.dispose();
+        /* Liberación adicional de recursos de texturas y sonidos de la nave y asteroides
+        nave.dispose();
+        for (Ball2 ball : balls1) {
+            ball.dispose();
+        }
+        for (Bullet bala : balas) {
+            bala.dispose();
+        }
+         */
     }
 }

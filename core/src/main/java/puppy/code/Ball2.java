@@ -12,25 +12,25 @@ public class Ball2 {
     private int xSpeed;
     private int ySpeed;
     private final int initialXSpeed;
-    private final int initialYSpeed;
     private Sprite spr;
 
     public Ball2(int x, int y, int size, int xSpeed, int ySpeed, Texture tx) {
         spr = new Sprite(tx);
         this.x = x;
-        this.y = y;
         this.initialXSpeed = xSpeed;
-        this.initialYSpeed = ySpeed;
 
-        // Ajustar posición inicial si el meteorito está fuera de los bordes
-        if (x - size < 0) this.x = x + size;
-        if (x + size > Gdx.graphics.getWidth()) this.x = x - size;
-        if (y - size < 0) this.y = y + size;
-        if (y + size > Gdx.graphics.getHeight()) this.y = y - size;
+        //validar que borde de esfera no quede fuera
+        if (x-size < 0) this.x = x+size;
+        if (x+size > Gdx.graphics.getWidth())this.x = x-size;
 
-        spr.setPosition(this.x, this.y);
-        this.xSpeed = initialXSpeed;
-        this.ySpeed = initialYSpeed;
+        this.y = y;
+        //validar que borde de esfera no quede fuera
+        if (y-size < 0) this.y = y+size;
+        if (y+size > Gdx.graphics.getHeight())this.y = y-size;
+
+        spr.setPosition(x, y);
+        this.setXSpeed(xSpeed);
+        this.setySpeed(ySpeed);
     }
 
     public void update() {
@@ -38,11 +38,13 @@ public class Ball2 {
         y += ySpeed;
 
         // Rebote en los bordes de la pantalla
-        if (x + xSpeed < 0 || x + xSpeed + spr.getWidth() > Gdx.graphics.getWidth()) {
+        if (x < 0 || x + spr.getWidth() >= 1280) {
             xSpeed = -xSpeed;
+            x = Math.max(0, Math.min(x, 1280 - (int) spr.getWidth())); // Ajusta la posición para mantener dentro del límite
         }
-        if (y + ySpeed < 0 || y + ySpeed + spr.getHeight() > Gdx.graphics.getHeight()) {
+        if (y < 0 || y + spr.getHeight() >= 720) {
             ySpeed = -ySpeed;
+            y = Math.max(0, Math.min(y, 720 - (int) spr.getHeight())); // Ajusta la posición para mantener dentro del límite
         }
 
         spr.setPosition(x, y);
@@ -60,14 +62,12 @@ public class Ball2 {
         if (spr.getBoundingRectangle().overlaps(b2.getArea())) {
             // Rebote sin cambiar la velocidad original
             xSpeed = -initialXSpeed;
-            ySpeed = -initialYSpeed;
             b2.xSpeed = -b2.initialXSpeed;
-            b2.ySpeed = -b2.initialYSpeed;
 
             // Separar los meteoritos para evitar que se queden pegados
             while (spr.getBoundingRectangle().overlaps(b2.getArea())) {
-                x += xSpeed;
-                y += ySpeed;
+                x += xSpeed / 2;
+                y += ySpeed / 2;
                 spr.setPosition(x, y);
             }
         }
