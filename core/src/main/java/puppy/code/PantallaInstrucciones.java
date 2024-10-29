@@ -26,13 +26,15 @@ public class PantallaInstrucciones implements Screen {
     private int velXAsteroides;
     private int velYAsteroides;
     private int cantAsteroides;
+    private boolean completado;
+    NaveSeleccionada naveSeleccionada;
 
     private Nave4 nave;
     private ArrayList<Ball2> balls1 = new ArrayList<>();
     private ArrayList<Ball2> balls2 = new ArrayList<>();
     private ArrayList<Bullet> balas = new ArrayList<>();
 
-    public PantallaInstrucciones(SpaceNavigation game, int ronda, int vidas, int score,
+    public PantallaInstrucciones(SpaceNavigation game, NaveSeleccionada naveSeleccionada, int ronda, int score,
                                  int velXAsteroides, int velYAsteroides, int cantAsteroides) {
         this.game = game;
         this.ronda = ronda;
@@ -40,6 +42,8 @@ public class PantallaInstrucciones implements Screen {
         this.velXAsteroides = velXAsteroides;
         this.velYAsteroides = velYAsteroides;
         this.cantAsteroides = cantAsteroides;
+        this.completado = false;
+        this.naveSeleccionada = naveSeleccionada;
 
         batch = game.getBatch();
         camera = new OrthographicCamera();
@@ -54,11 +58,13 @@ public class PantallaInstrucciones implements Screen {
         gameMusic.play();
 
         // Inicializar la nave en el centro de la pantalla
-        nave = new Nave4(Gdx.graphics.getWidth() / 2 - 50, 30, new Texture(Gdx.files.internal("MainShip3.png")),
+        nave = new Nave4(Gdx.graphics.getWidth() / 2 - 50, 30, new Texture(Gdx.files.internal(naveSeleccionada.texturaNave)),
             Gdx.audio.newSound(Gdx.files.internal("hurt.ogg")),
-            new Texture(Gdx.files.internal("Rocket2.png")),
-            Gdx.audio.newSound(Gdx.files.internal("pop-sound.mp3")));
-        nave.setVidas(vidas);
+            new Texture(Gdx.files.internal(naveSeleccionada.texturaShoot)),
+            Gdx.audio.newSound(Gdx.files.internal(naveSeleccionada.soundShoot)),
+            naveSeleccionada.speed);
+        nave.setVidas(naveSeleccionada.vida);
+        System.out.println(naveSeleccionada.speed);
 
         // Crear asteroides dentro de los límites de la pantalla y con velocidades iniciales no nulas
         Random r = new Random();
@@ -74,29 +80,33 @@ public class PantallaInstrucciones implements Screen {
         }
     }
 
-    public boolean mostrarControles() {
-        if (!batch.isDrawing()) return false; // Verificar si batch ha iniciado
+    public void mostrarControles() {
         boolean bottomLEFTPressed = false;
         boolean bottomRIGHTPressed = false;
         boolean bottomUPPressed = false;
         boolean bottomDOWNPressed = false;
-        switch (ronda) {
-            case 1:
-                // Muestra controles específicos de la primera ronda
-                if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) bottomLEFTPressed = true;
-                if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) bottomRIGHTPressed = true;
-                if(Gdx.input.isKeyPressed(Input.Keys.UP)) bottomUPPressed = true;
-                if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) bottomDOWNPressed = true;
-                if(bottomLEFTPressed && bottomRIGHTPressed && bottomUPPressed && bottomDOWNPressed){
-                    return true;
-                } else batch.draw(imagenMovimiento, 250, 450, 700, 250);
-                break;
+
+        if (ronda == 1) {
+            // Verifica los controles solo en la primera ronda
+            if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) bottomLEFTPressed = true;
+            if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) bottomRIGHTPressed = true;
+            if(Gdx.input.isKeyPressed(Input.Keys.UP)) bottomUPPressed = true;
+            if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) bottomDOWNPressed = true;
+
+            if(bottomLEFTPressed && bottomRIGHTPressed && bottomUPPressed && bottomDOWNPressed) {
+                completado = true;
+            } else {
+                batch.draw(imagenMovimiento, 250, 450, 700, 250);
+            }
+        } else {
+            completado = true; // Avanzar automáticamente en rondas posteriores
+        }
+    }/*
             case 2:
             case 3:
             default:
         }
-        return false;
-    }
+    }*/
 
     @Override
     public void render(float delta) {
@@ -172,8 +182,8 @@ public class PantallaInstrucciones implements Screen {
         batch.end();
 
         // Nivel completado
-        if (mostrarControles()) {
-            Screen ss = new PantallaInstrucciones(game, ronda + 1, nave.getVidas(), score,
+        if (completado) {
+            Screen ss = new PantallaInstrucciones(game, naveSeleccionada, ronda + 1, score,
                 velXAsteroides + 3, velYAsteroides + 3, cantAsteroides + 1);
             ss.resize(1280, 720);
             game.setScreen(ss);

@@ -21,14 +21,16 @@ public class Nave4 {
     private boolean herido = false;
     private int tiempoHeridoMax = 50;
     private int tiempoHerido;
+    private int speed;
 
-    public Nave4(int x, int y, Texture tx, Sound soundChoque, Texture txBala, Sound soundBala) {
+    public Nave4(int x, int y, Texture tx, Sound soundChoque, Texture txBala, Sound soundBala, int speed) {
         sonidoHerido = soundChoque;
         this.soundBala = soundBala;
         this.txBala = txBala;
         spr = new Sprite(tx);
         spr.setPosition(x, y);
         spr.setBounds(x, y, 45, 45);
+        this.speed = speed;
     }
 
     private float baseXVel = 0;
@@ -44,12 +46,12 @@ public class Nave4 {
         float y = spr.getY();
 
         if (!herido) {
-            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) baseXVel = -3;
-            else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) baseXVel = 3;
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) baseXVel = -speed;
+            else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) baseXVel = speed;
             else baseXVel = 0;
 
-            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) baseYVel = -3;
-            else if (Gdx.input.isKeyPressed(Input.Keys.UP)) baseYVel = 3;
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) baseYVel = -speed;
+            else if (Gdx.input.isKeyPressed(Input.Keys.UP)) baseYVel = speed;
             else baseYVel = 0;
 
             if (enRalentizacion) {

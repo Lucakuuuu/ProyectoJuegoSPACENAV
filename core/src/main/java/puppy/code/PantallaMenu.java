@@ -14,7 +14,7 @@ public class PantallaMenu implements Screen {
     private Texture tituloImagen;
 
     // Opciones del menú
-    private String[] opciones = {"Jugar", "Aprender a jugar", "Cerrar Juego"};
+    private String[] opciones = {"Jugar", "Aprender a jugar", "Elegir Nave", "Cerrar Juego"};
     private int seleccionActual = 0; // Índice de la opción seleccionada actualmente
 
     public PantallaMenu(SpaceNavigation game) {
@@ -60,15 +60,19 @@ public class PantallaMenu implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (seleccionActual) {
                 case 0: // "Jugar"
-                    game.setScreen(new PantallaJuego(game, 1, 3, 0, 1, 1, 10));
+                    game.setScreen(new PantallaJuego(game, game.getNaveSeleccionada(), 1, 0, 1, 1, 10));
                     dispose();
                     break;
                 case 1: // "Aprender a jugar"
                     // Se podría implementar una pantalla adicional para mostrar instrucciones
-                    game.setScreen(new PantallaInstrucciones(game, 1, 1, 0, 0, 0, 0));
+                    game.setScreen(new PantallaInstrucciones(game, game.getNaveSeleccionada(), 1, 0, 0, 0, 0));
                     dispose();
                     break;
-                case 2: // "Cerrar Juego"
+                case 2:
+                    game.setScreen(new elegirNave(game));
+                    dispose();
+                    break;
+                case 3: // "Cerrar Juego"
                     Gdx.app.exit();
                     break;
             }

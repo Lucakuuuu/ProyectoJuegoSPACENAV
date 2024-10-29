@@ -14,6 +14,7 @@ public class SpaceNavigation extends Game {
     private SpriteBatch batch;
     private BitmapFont font;
     private int highScore;
+    private NaveSeleccionada naveSeleccionada; // Atributo para almacenar la nave seleccionada
 
     public void create() {
         batch = new SpriteBatch();
@@ -21,6 +22,8 @@ public class SpaceNavigation extends Game {
         font.getData().setScale(2f);
 
         loadHighScore(); // Carga el high score al inicio
+        naveSeleccionada = new NaveSeleccionada(3, 3, "MainShip.png",
+            "Rocket2.png", "pop-sound.mp3"); // Inicializa con valores predeterminados o vacíos
         setScreen(new PantallaMenu(this)); // Muestra el menú principal
     }
 
@@ -74,4 +77,14 @@ public class SpaceNavigation extends Game {
         }
         setScreen(newScreen); // Cambia a la nueva pantalla
     }
+
+    // Getter y Setter para naveSeleccionada
+    public NaveSeleccionada getNaveSeleccionada() {
+        return naveSeleccionada;
+    }
+
+    public void setNaveSeleccionada(NaveSeleccionada naveSeleccionada) {
+        this.naveSeleccionada = naveSeleccionada;
+    }
 }
+

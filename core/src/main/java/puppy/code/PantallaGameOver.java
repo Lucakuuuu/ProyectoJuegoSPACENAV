@@ -30,7 +30,7 @@ public class PantallaGameOver implements Screen {
         game.getBatch().end();
 
         if (Gdx.input.isTouched() || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-            game.setScreen(new PantallaJuego(game, 1, 3, 0, 1, 1, 10));
+            game.setScreen(new PantallaJuego(game, game.getNaveSeleccionada(), 1, 0, 1, 1, 10));
             dispose(); // Liberar recursos de la pantalla actual antes de pasar a la nueva
         }
     }
