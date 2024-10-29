@@ -127,4 +127,56 @@ public class Nave4 {
     public int getX() { return (int) spr.getX(); }
     public int getY() { return (int) spr.getY(); }
     public void setVidas(int vidas2) { vidas = vidas2; }
+
+    public void draw(SpriteBatch batch, PantallaInstrucciones juego) {
+        float x = spr.getX();
+        float y = spr.getY();
+
+        if (!herido) {
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) baseXVel = -3;
+            else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) baseXVel = 3;
+            else baseXVel = 0;
+
+            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) baseYVel = -3;
+            else if (Gdx.input.isKeyPressed(Input.Keys.UP)) baseYVel = 3;
+            else baseYVel = 0;
+
+            if (enRalentizacion) {
+                xVel = slowXVel;
+                yVel = slowYVel;
+                tiempoRalentizacion--;
+
+                if (tiempoRalentizacion <= 0) {
+                    enRalentizacion = false;
+                    xVel = baseXVel;
+                    yVel = baseYVel;
+                }
+            } else {
+                xVel = baseXVel;
+                yVel = baseYVel;
+            }
+
+            // Limitar el movimiento dentro de los bordes de la pantalla
+            if (x + xVel < 0) x = 0;
+            else if (x + xVel + spr.getWidth() > 1280) x = 1280 - spr.getWidth();
+
+            if (y + yVel < 0) y = 0;
+            else if (y + yVel + spr.getHeight() > 720) y = 720 - spr.getHeight();
+
+            spr.setPosition(x + xVel, y + yVel);
+            spr.draw(batch);
+        } else {
+            spr.setX(spr.getX() + MathUtils.random(-2, 2));
+            spr.draw(batch);
+            spr.setX(x);
+            tiempoHerido--;
+            if (tiempoHerido <= 0) herido = false;
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            Bullet bala = new Bullet(spr.getX() + spr.getWidth() / 2 - 5, spr.getY() + spr.getHeight(), 0, 8, txBala);
+            juego.agregarBala(bala);
+            soundBala.play();
+        }
+    }
 }

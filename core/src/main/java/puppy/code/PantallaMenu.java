@@ -21,7 +21,7 @@ public class PantallaMenu implements Screen {
         this.game = game;
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1200, 800);
+        camera.setToOrtho(false, 1280, 720);
     }
 
     @Override
@@ -64,11 +64,10 @@ public class PantallaMenu implements Screen {
                     dispose();
                     break;
                 case 1: // "Aprender a jugar"
-                    /* Se podría implementar una pantalla adicional para mostrar instrucciones
-                    game.setScreen(new PantallaInstrucciones(game));
+                    // Se podría implementar una pantalla adicional para mostrar instrucciones
+                    game.setScreen(new PantallaInstrucciones(game, 1, 1, 0, 0, 0, 0));
                     dispose();
                     break;
-                    */
                 case 2: // "Cerrar Juego"
                     Gdx.app.exit();
                     break;
