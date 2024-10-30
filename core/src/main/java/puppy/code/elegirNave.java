@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 
-public class elegirNave extends Ships implements Screen {
+public class elegirNave implements Screen {
     private final SpaceNavigation game;
     private OrthographicCamera camera;
     private Texture naveImagen;
@@ -27,7 +27,6 @@ public class elegirNave extends Ships implements Screen {
     };
 
     public elegirNave(SpaceNavigation game) {
-        super(3, 3, "MainShip.png", "Rocket2.png", "pop-sound.mp3");
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
@@ -117,13 +116,7 @@ public class elegirNave extends Ships implements Screen {
     @Override public void pause() {}
     @Override public void resume() {}
 
-    @Override
     void cambiarNave(int vida, int speed, String texturaNave, String texturaShoot, String soundShoot) {
-        this.vida = vida;
-        this.speed = speed;
-        this.texturaNave = texturaNave;
-        this.texturaShoot = texturaShoot;
-        this.soundShoot = soundShoot;
 
         NaveSeleccionada naveSeleccionada = new NaveSeleccionada(vida, speed, texturaNave,
             texturaShoot, soundShoot);

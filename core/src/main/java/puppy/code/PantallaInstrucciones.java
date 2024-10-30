@@ -213,7 +213,7 @@ public class PantallaInstrucciones implements Screen {
             game.setScreen(ss);
             dispose();
         }
-        if(ronda == 3 && balls1.size() == 0){
+        if(ronda == 3 && balls1.size() == 0 && Gdx.input.isKeyPressed(Input.Keys.ENTER)){
             isPaused = !isPaused;
             if (isPaused) {
                 gameMusic.pause();

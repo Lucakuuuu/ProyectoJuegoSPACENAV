@@ -1,6 +1,7 @@
 package puppy.code;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class PantallaJuego implements Screen {
 
+    private Random random;
     private SpaceNavigation game;
     private OrthographicCamera camera;
     private SpriteBatch batch;
@@ -28,6 +30,7 @@ public class PantallaJuego implements Screen {
     private int velYAsteroides;
     private int cantAsteroides;
     private NaveSeleccionada naveSeleccionada;
+    private List<PowerUp> powerUps;
 
     private Nave4 nave;
     private ArrayList<Ball2> balls1 = new ArrayList<>();
@@ -36,8 +39,10 @@ public class PantallaJuego implements Screen {
 
     private BitmapFont font;
     private Texture pauseBackground;
+    private Texture textureShieldPowerUp;
+    private Texture textureSpeedPowerUp;
     private boolean isPaused;
-    private int seleccionActual = 0; // Mover seleccionActual a nivel de clase
+    private int seleccionActual = 0;
     private String[] opciones = {"Volver al juego", "Cambiar nave", "Salir"};
 
     public PantallaJuego(SpaceNavigation game, NaveSeleccionada naveSeleccionada, int ronda, int score,
@@ -49,6 +54,15 @@ public class PantallaJuego implements Screen {
         this.velYAsteroides = velYAsteroides;
         this.cantAsteroides = cantAsteroides;
         this.naveSeleccionada = naveSeleccionada;
+        this.powerUps = new ArrayList<>();
+        this.random = new Random();
+
+        textureShieldPowerUp = new Texture(Gdx.files.internal("Shield.png"));
+        textureSpeedPowerUp = new Texture(Gdx.files.internal("Speed.png"));
+
+        // Inicializar power-ups con tiempo de visibilidad
+        powerUps.add(new ShieldPowerUp(generateRandomX(), generateRandomY(), 10f, textureShieldPowerUp));
+        powerUps.add(new SpeedBoostPowerUp(generateRandomX(), generateRandomY(), 10f, 3f, textureSpeedPowerUp));
 
         batch = game.getBatch();
         camera = new OrthographicCamera();
@@ -57,8 +71,6 @@ public class PantallaJuego implements Screen {
         font = new BitmapFont();
         font.getData().setScale(2f);
         font.setColor(Color.WHITE);
-
-        pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
 
         // Cargar sonidos y música
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.ogg"));
@@ -69,7 +81,8 @@ public class PantallaJuego implements Screen {
         gameMusic.play();
 
         // Inicializar la nave en el centro de la pantalla
-        nave = new Nave4(Gdx.graphics.getWidth() / 2 - 50, 30, new Texture(Gdx.files.internal(naveSeleccionada.texturaNave)),
+        nave = new Nave4(Gdx.graphics.getWidth() / 2 - 50, 30,
+            new Texture(Gdx.files.internal(naveSeleccionada.texturaNave)),
             Gdx.audio.newSound(Gdx.files.internal("hurt.ogg")),
             new Texture(Gdx.files.internal(naveSeleccionada.texturaShoot)),
             Gdx.audio.newSound(Gdx.files.internal(naveSeleccionada.soundShoot)),
@@ -90,6 +103,14 @@ public class PantallaJuego implements Screen {
         }
     }
 
+    private float generateRandomX() {
+        return random.nextInt(Gdx.graphics.getWidth() - 32);
+    }
+
+    private float generateRandomY() {
+        return random.nextInt(Gdx.graphics.getHeight() - 32);
+    }
+
     public void dibujaEncabezado() {
         CharSequence str = "Vidas: " + nave.getVidas() + " Ronda: " + ronda;
         game.getFont().getData().setScale(2f);
@@ -100,8 +121,10 @@ public class PantallaJuego implements Screen {
 
     @Override
     public void render(float delta) {
+        // Limpiar la pantalla
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // Pausar o reanudar música si se presiona ESC
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             isPaused = !isPaused;
             if (isPaused) {
@@ -117,66 +140,63 @@ public class PantallaJuego implements Screen {
         }
 
         batch.begin();
+        // Dibujar encabezado de información del juego
         dibujaEncabezado();
 
-        if (!nave.estaHerido()) {
-            // Colisiones entre balas y asteroides
-            for (int i = 0; i < balas.size(); i++) {
-                Bullet b = balas.get(i);
-                b.update();
-                for (int j = 0; j < balls1.size(); j++) {
-                    if (b.checkCollision(balls1.get(j))) {
-                        explosionSound.play();
-                        balls1.remove(j);
-                        balls2.remove(j);
-                        j--;
-                        score += 10;
-                    }
-                }
+        // Actualizar y dibujar cada power-up
+        for (PowerUp powerUp : powerUps) {
+            powerUp.update(delta);
 
-                if (b.isDestroyed()) {
-                    balas.remove(b);
-                    i--;
-                }
-            }
+            if (powerUp.isActive()) { // Si el power-up está activo
+                powerUp.draw(batch);
 
-            // Actualizar movimiento de asteroides
-            for (Ball2 ball : balls1) {
-                ball.update();
-            }
-
-            // Colisiones entre asteroides y rebotes
-            for (int i = 0; i < balls1.size(); i++) {
-                Ball2 ball1 = balls1.get(i);
-                for (int j = i + 1; j < balls2.size(); j++) {
-                    Ball2 ball2 = balls2.get(j);
-                    ball1.checkCollision(ball2);
+                // Detectar colisión con la nave
+                if (powerUp.getBounds().overlaps(nave.getBounds())) {
+                    powerUp.applyEffect(nave);  // Aplicar efecto a la nave
+                    powerUp.setActive(false);   // Desactivar el power-up y comenzar enfriamiento de 10 segundos
                 }
             }
         }
 
-        // Dibujar balas
-        for (Bullet b : balas) {
-            b.draw(batch);
-        }
-
-        // Dibujar nave y verificar colisiones con asteroides
+        // Dibujar y actualizar estado de la nave, balas y asteroides
         nave.draw(batch, this);
-        for (int i = 0; i < balls1.size(); i++) {
-            Ball2 b = balls1.get(i);
+
+        // Dibujar y actualizar balas
+        for (Bullet b : balas) {
+            b.update();
             b.draw(batch);
 
-            if (nave.checkCollision(b)) {
+            for (int j = 0; j < balls1.size(); j++) {
+                if (b.checkCollision(balls1.get(j))) {
+                    explosionSound.play();
+                    balls1.remove(j);
+                    balls2.remove(j);
+                    score += 10;
+                    j--;
+                }
+            }
+        }
+
+        // Dibujar y actualizar asteroides
+        for (Ball2 ball : balls1) {
+            ball.update();
+            ball.draw(batch);
+        }
+
+        // Comprobar colisiones entre la nave y los asteroides
+        for (int i = 0; i < balls1.size(); i++) {
+            if (nave.checkCollision(balls1.get(i))) {
                 balls1.remove(i);
                 balls2.remove(i);
                 i--;
             }
         }
 
-        // Comprobar si la nave ha sido destruida
+        // Comprobar si la nave está destruida
         if (nave.estaDestruido()) {
-            if (score > game.getHighScore())
+            if (score > game.getHighScore()) {
                 game.setHighScore(score);
+            }
             Screen ss = new PantallaGameOver(game);
             ss.resize(1280, 720);
             game.setScreen(ss);
@@ -185,7 +205,7 @@ public class PantallaJuego implements Screen {
 
         batch.end();
 
-        // Nivel completado
+        // Pasar a la siguiente ronda si todos los asteroides fueron eliminados
         if (balls1.size() == 0) {
             Screen ss = new PantallaJuego(game, game.getNaveSeleccionada(), ronda + 1, score,
                 velXAsteroides + 3, velYAsteroides + 3, cantAsteroides + 10);
