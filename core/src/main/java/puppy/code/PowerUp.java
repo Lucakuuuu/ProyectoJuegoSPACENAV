@@ -12,57 +12,62 @@ public abstract class PowerUp {
     protected boolean active = true;
     protected boolean inUse = false;
     protected float duration;
-    protected Texture texture;
-    protected float visibilityTimer = 10f;  // Control de visibilidad (10s visible, 5s invisible)
+    protected Texture[] textures;
+    protected float visibilityTimer = VISIBLE_DURATION; // Control de visibilidad (10s visible, 5s invisible)
     protected static final float VISIBLE_DURATION = 10f;
     protected static final float INVISIBLE_DURATION = 5f;
     protected static final float USED_COOLDOWN = 10f;
 
-    public PowerUp(float x, float y, float duration, Texture texture) {
+    public PowerUp(float x, float y, float duration, Texture[] textures) {
         this.x = x;
         this.y = y;
         this.duration = duration;
-        this.texture = texture;
+        this.textures = textures;
     }
 
     public abstract void applyEffect(Nave4 nave);
 
     public void update(float delta) {
-        // Si el power-up está en uso, desactiva visibilidad y cuenta para el enfriamiento
         if (inUse) {
-            visibilityTimer -= delta;
+            handleCooldown(delta);
+        } else {
+            handleVisibility(delta);
+        }
+    }
+
+    private void handleCooldown(float delta) {
+        visibilityTimer -= delta;
+        if (visibilityTimer <= 0) {
+            visibilityTimer = USED_COOLDOWN; // Enfriamiento después de ser usado
+            inUse = false;
+            active = false;
+        }
+    }
+
+    private void handleVisibility(float delta) {
+        visibilityTimer -= delta;
+        if (active) {
             if (visibilityTimer <= 0) {
-                visibilityTimer = USED_COOLDOWN; // 10 segundos después de ser usado
-                inUse = false;
                 active = false;
+                visibilityTimer = INVISIBLE_DURATION; // Desactiva por 5 segundos
             }
         } else {
-            visibilityTimer -= delta;
-            if (active) {
-                // Power-up visible y contando hacia su desaparición
-                if (visibilityTimer <= 0) {
-                    active = false;
-                    visibilityTimer = INVISIBLE_DURATION; // Desactiva por 5 segundos
-                }
-            } else {
-                // Power-up invisible, cuenta para reaparecer
-                if (visibilityTimer <= 0) {
-                    active = true;
-                    visibilityTimer = VISIBLE_DURATION; // Vuelve a activarse durante 10 segundos
-                    resetPosition(); // Reaparece en nueva posición aleatoria
-                }
+            if (visibilityTimer <= 0) {
+                active = true;
+                visibilityTimer = VISIBLE_DURATION; // Vuelve a activarse durante 10 segundos
+                resetPosition(); // Reaparece en nueva posición aleatoria
             }
         }
     }
 
     public void draw(SpriteBatch batch) {
-        if (active) {
-            batch.draw(texture, x, y);
+        if (active && textures.length > 0) {
+            batch.draw(textures[0], x, y); // Usa el primer texture para dibujar
         }
     }
 
     public Rectangle getBounds() {
-        return new Rectangle(x, y, texture.getWidth(), texture.getHeight());
+        return new Rectangle(x, y, textures[0].getWidth(), textures[0].getHeight()); // Usar el primer texture para calcular dimensiones
     }
 
     public boolean isActive() {
@@ -71,12 +76,8 @@ public abstract class PowerUp {
 
     public void setActive(boolean active) {
         this.active = active;
-        inUse = !active;
-        if (active) {
-            visibilityTimer = VISIBLE_DURATION;
-        } else {
-            visibilityTimer = USED_COOLDOWN;
-        }
+        this.inUse = !active;
+        visibilityTimer = active ? VISIBLE_DURATION : USED_COOLDOWN;
     }
 
     public void resetPosition() {
@@ -84,4 +85,3 @@ public abstract class PowerUp {
         y = random.nextInt(Gdx.graphics.getHeight() - 32);
     }
 }
-

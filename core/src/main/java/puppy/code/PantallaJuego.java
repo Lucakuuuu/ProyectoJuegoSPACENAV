@@ -16,6 +16,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import static com.badlogic.gdx.math.MathUtils.random;
+
 public class PantallaJuego implements Screen {
 
     private Random random;
@@ -39,11 +41,10 @@ public class PantallaJuego implements Screen {
 
     private BitmapFont font;
     private Texture pauseBackground;
-    private Texture textureShieldPowerUp;
-    private Texture textureSpeedPowerUp;
     private boolean isPaused;
     private int seleccionActual = 0;
     private String[] opciones = {"Volver al juego", "Cambiar nave", "Salir"};
+    private ArrayList<Updatable> updatables;
 
     public PantallaJuego(SpaceNavigation game, NaveSeleccionada naveSeleccionada, int ronda, int score,
                          int velXAsteroides, int velYAsteroides, int cantAsteroides) {
@@ -56,13 +57,17 @@ public class PantallaJuego implements Screen {
         this.naveSeleccionada = naveSeleccionada;
         this.powerUps = new ArrayList<>();
         this.random = new Random();
+        updatables = new ArrayList<>();
 
-        textureShieldPowerUp = new Texture(Gdx.files.internal("Shield.png"));
-        textureSpeedPowerUp = new Texture(Gdx.files.internal("Speed.png"));
+        Texture[] shieldFrames = { new Texture("shield1.png"), new Texture("shield2.png") };
+        ShieldPowerUp shieldPowerUp = new ShieldPowerUp(generateRandomX(), generateRandomY(), 10f, shieldFrames);
 
-        // Inicializar power-ups con tiempo de visibilidad
-        powerUps.add(new ShieldPowerUp(generateRandomX(), generateRandomY(), 10f, textureShieldPowerUp));
-        powerUps.add(new SpeedBoostPowerUp(generateRandomX(), generateRandomY(), 10f, 3f, textureSpeedPowerUp));
+        Texture[] speedFrames = { new Texture("Speed1.png"), new Texture("Speed2.png") };
+        SpeedBoostPowerUp speedPowerUp = new SpeedBoostPowerUp(generateRandomX(), generateRandomX(), 10f, 3f, speedFrames);
+
+        // Agrega ambos power-ups a la lista de `updatables`
+        updatables.add(shieldPowerUp);
+        updatables.add(speedPowerUp);
 
         batch = game.getBatch();
         camera = new OrthographicCamera();
@@ -140,20 +145,33 @@ public class PantallaJuego implements Screen {
         }
 
         batch.begin();
-        // Dibujar encabezado de información del juego
+        /*
+        for (Updatable updatable : updatables) {
+            updatable.update(delta);
+
+            // Verifica si el objeto es un PowerUp y llámalo para que se dibuje
+            if (updatable instanceof PowerUp) {
+                ((PowerUp) updatable).draw(batch);
+            }
+        }
+
+         */
         dibujaEncabezado();
 
-        // Actualizar y dibujar cada power-up
-        for (PowerUp powerUp : powerUps) {
-            powerUp.update(delta);
+        for (Updatable updatable : updatables) {
+            updatable.update(delta);
 
-            if (powerUp.isActive()) { // Si el power-up está activo
-                powerUp.draw(batch);
+            if (updatable instanceof PowerUp) {
+                PowerUp powerUp = (PowerUp) updatable;
 
-                // Detectar colisión con la nave
-                if (powerUp.getBounds().overlaps(nave.getBounds())) {
-                    powerUp.applyEffect(nave);  // Aplicar efecto a la nave
-                    powerUp.setActive(false);   // Desactivar el power-up y comenzar enfriamiento de 10 segundos
+                if (powerUp.isActive()) {
+                    powerUp.draw(batch);
+
+                    // Detectar colisión con la nave
+                    if (powerUp.getBounds().overlaps(nave.getBounds())) {
+                        powerUp.applyEffect(nave);
+                        powerUp.setActive(false); // Desactiva por 10 segundos después de ser usado
+                    }
                 }
             }
         }
