@@ -16,8 +16,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import static com.badlogic.gdx.math.MathUtils.random;
-
 public class PantallaJuego implements Screen {
 
     private Random random;
@@ -58,6 +56,7 @@ public class PantallaJuego implements Screen {
         this.powerUps = new ArrayList<>();
         this.random = new Random();
         updatables = new ArrayList<>();
+        pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
 
         Texture[] shieldFrames = { new Texture("shield1.png"), new Texture("shield2.png") };
         ShieldPowerUp shieldPowerUp = new ShieldPowerUp(generateRandomX(), generateRandomY(), 10f, shieldFrames);
