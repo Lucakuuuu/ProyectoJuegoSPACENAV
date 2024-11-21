@@ -7,15 +7,14 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class elegirNave implements Screen {
+public class ElegirNave implements Screen {
     private final SpaceNavigation game;
     private OrthographicCamera camera;
     private Texture naveImagen;
     private Sound cambioNaveSound;
     private int indiceNaveActual = 0;
-    Texture pauseBackground;
+    private Texture pauseBackground;
     private int seleccionActual = 0;
     private String[] opciones = {"Volver a la selección", "Volver al menú"};
     private boolean isPaused;
@@ -32,7 +31,7 @@ public class elegirNave implements Screen {
             "Ship_3_shoot.png", "shoot 3.mp3")
     };
 
-    public elegirNave(SpaceNavigation game) {
+    public ElegirNave(SpaceNavigation game) {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
@@ -40,7 +39,6 @@ public class elegirNave implements Screen {
         cambioNaveSound = Gdx.audio.newSound(Gdx.files.internal("slash.mp3"));
         pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
         this.isPaused = false;
-        // Inicializar ScreenManager
         screenManager = ScreenManager.getInstance(game);
     }
 

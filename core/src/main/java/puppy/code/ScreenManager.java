@@ -28,7 +28,7 @@ public class ScreenManager {
     }
 
     public void showElegirNaveScreen() {
-        game.setScreen(new elegirNave(game));
+        game.setScreen(new ElegirNave(game));
     }
 
     public void showGameOverScreen(int identificacion) {
