@@ -17,8 +17,9 @@ public class elegirNave implements Screen {
     private int indiceNaveActual = 0;
     Texture pauseBackground;
     private int seleccionActual = 0;
-    private String[] opciones = {"Volver a la selección", "Cambiar nave", "Volver al menú"};
+    private String[] opciones = {"Volver a la selección", "Volver al menú"};
     private boolean isPaused;
+    private ScreenManager screenManager;
 
     private Nave[] naves = {
         new Nave("Falcon", 3, 5, "MainShip.png",
@@ -39,6 +40,8 @@ public class elegirNave implements Screen {
         cambioNaveSound = Gdx.audio.newSound(Gdx.files.internal("slash.mp3"));
         pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
         this.isPaused = false;
+        // Inicializar ScreenManager
+        screenManager = ScreenManager.getInstance(game);
     }
 
     // Clase Nave para almacenar los datos de cada nave
@@ -163,13 +166,8 @@ public class elegirNave implements Screen {
                     isPaused = false;
                     //gameMusic.play();
                     break;
-                case 1: // "Cambiar nave"
-                    // Implementar la lógica para cambiar nave
-                    break;
-                case 2: // "Salir"
-                    Screen ss = new PantallaMenu(game);
-                    ss.resize(1280, 720);
-                    game.setScreen(ss);
+                case 1: // "Salir"
+                    screenManager.showMainMenu();
                     dispose();
                     break;
             }
@@ -186,6 +184,6 @@ public class elegirNave implements Screen {
         NaveSeleccionada naveSeleccionada = new NaveSeleccionada(vida, speed, texturaNave,
             texturaShoot, soundShoot);
         game.setNaveSeleccionada(naveSeleccionada);
-        game.setScreen(new PantallaMenu(game));
+        screenManager.showMainMenu();
     }
 }

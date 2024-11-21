@@ -162,7 +162,7 @@ public class PantallaJuego implements Screen {
 
                     // Detectar colisión con la nave
                     if (powerUp.getBounds().overlaps(nave.getBounds())) {
-                        powerUp.applyEffect(nave);
+                        powerUp.ejecutar(delta, nave);
                         powerUp.setActive(false); // Desactiva por 10 segundos después de ser usado
                     }
                 }

@@ -12,7 +12,7 @@ public abstract class PowerUp {
     protected boolean inUse = false;
     protected float duration;
     protected Texture[] textures;
-    protected float visibilityTimer = VISIBLE_DURATION; // Control de visibilidad (10s visible, 5s invisible)
+    protected float visibilityTimer = VISIBLE_DURATION; // Control de visibilidad
     protected static final float VISIBLE_DURATION = 10f;
     protected static final float INVISIBLE_DURATION = 5f;
     protected static final float USED_COOLDOWN = 10f;
@@ -24,49 +24,73 @@ public abstract class PowerUp {
         this.textures = textures;
     }
 
-    public abstract void applyEffect(Nave4 nave);
-
-    public void update(float delta) {
+    /**
+     * Método Template que define el flujo completo de un power-up:
+     * - Control de visibilidad
+     * - Activación del efecto
+     * - Aplicación del efecto
+     * - Manejo de duración
+     **/
+    public final void ejecutar(float delta, Nave4 nave) {
         if (inUse) {
-            handleCooldown(delta);
+            aplicarEfecto(nave, delta);  // Paso específico implementado por subclases
+            manejarDuracion(delta);    // Paso común
         } else {
-            handleVisibility(delta);
+            controlarVisibilidad(delta);  // Paso común
+            if (active && debeActivarse(nave)) { // Paso "gancho"
+                activar(nave);              // Paso específico implementado por subclases
+                inUse = true;
+            }
         }
     }
 
-    private void handleCooldown(float delta) {
+    // Pasos comunes para todos los power-ups
+    private void controlarVisibilidad(float delta) {
         visibilityTimer -= delta;
-        if (visibilityTimer <= 0) {
-            visibilityTimer = USED_COOLDOWN; // Enfriamiento después de ser usado
+        if (active) {
+            if (visibilityTimer <= 0) {
+                active = false;
+                visibilityTimer = INVISIBLE_DURATION;
+            }
+        } else {
+            if (visibilityTimer <= 0) {
+                active = true;
+                visibilityTimer = VISIBLE_DURATION;
+                resetPosition();
+            }
+        }
+    }
+
+    private void manejarDuracion(float delta) {
+        duration -= delta;
+        if (duration <= 0) {
             inUse = false;
             active = false;
         }
     }
 
-    private void handleVisibility(float delta) {
-        visibilityTimer -= delta;
-        if (active) {
-            if (visibilityTimer <= 0) {
-                active = false;
-                visibilityTimer = INVISIBLE_DURATION; // Desactiva por 5 segundos
-            }
-        } else {
-            if (visibilityTimer <= 0) {
-                active = true;
-                visibilityTimer = VISIBLE_DURATION; // Vuelve a activarse durante 10 segundos
-                resetPosition(); // Reaparece en nueva posición aleatoria
-            }
-        }
+    protected boolean debeActivarse(Nave4 nave) {
+        return nave.getBounds().overlaps(getBounds());
     }
+
+    // Pasos específicos que las subclases deben implementar
+    protected abstract void activar(Nave4 nave);        // Acción al activar el power-up
+    protected abstract void aplicarEfecto(Nave4 nave, float delta); // Acción continua mientras está activo
 
     public void draw(SpriteBatch batch) {
         if (active && textures.length > 0) {
-            batch.draw(textures[0], x, y); // Usa el primer texture para dibujar
+            batch.draw(textures[0], x, y); // Usa la primera textura para representar el power-up
         }
     }
 
+    // Métodos auxiliares comunes
     public Rectangle getBounds() {
-        return new Rectangle(x, y, textures[0].getWidth(), textures[0].getHeight()); // Usar el primer texture para calcular dimensiones
+        return new Rectangle(x, y, textures[0].getWidth(), textures[0].getHeight());
+    }
+
+    public void resetPosition() {
+        x = random.nextInt(Gdx.graphics.getWidth() - 32);
+        y = random.nextInt(Gdx.graphics.getHeight() - 32);
     }
 
     public boolean isActive() {
@@ -79,8 +103,5 @@ public abstract class PowerUp {
         visibilityTimer = active ? VISIBLE_DURATION : USED_COOLDOWN;
     }
 
-    public void resetPosition() {
-        x = random.nextInt(Gdx.graphics.getWidth() - 32);
-        y = random.nextInt(Gdx.graphics.getHeight() - 32);
-    }
+    public abstract void update(float delta);
 }
