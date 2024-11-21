@@ -14,6 +14,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import strategies.PowerUpStrategy;
+import strategies.ShieldStrategy;
+import strategies.SpeedBoostStrategy;
 
 public class PantallaJuego implements Screen {
 
@@ -61,14 +64,16 @@ public class PantallaJuego implements Screen {
         pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
 
         Texture[] shieldFrames = { new Texture("shield1.png"), new Texture("shield2.png") };
-        ShieldPowerUp shieldPowerUp = new ShieldPowerUp(generateRandomX(), generateRandomY(), 10f, shieldFrames);
+        PowerUpStrategy shieldStrategy = new ShieldStrategy();
+        ShieldPowerUp shieldPowerUp = new ShieldPowerUp(generateRandomX(), generateRandomY(), 10f, shieldFrames, shieldStrategy);
 
         Texture[] speedFrames = { new Texture("Speed1.png"), new Texture("Speed2.png") };
-        SpeedBoostPowerUp speedPowerUp = new SpeedBoostPowerUp(generateRandomX(), generateRandomX(), 10f, 3f, speedFrames);
+        PowerUpStrategy speedBoostStrategy = new SpeedBoostStrategy(2.0f);
+        SpeedBoostPowerUp speedBoostPowerUp = new SpeedBoostPowerUp(generateRandomX(), generateRandomY(), 10f, speedFrames, speedBoostStrategy);
 
         // Agrega ambos power-ups a la lista de `updatables`
         updatables.add(shieldPowerUp);
-        updatables.add(speedPowerUp);
+        updatables.add(speedBoostPowerUp);
 
         batch = game.getBatch();
         camera = new OrthographicCamera();

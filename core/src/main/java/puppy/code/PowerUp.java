@@ -5,8 +5,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import static com.badlogic.gdx.math.MathUtils.random;
+import strategies.PowerUpStrategy;
 
-public abstract class PowerUp {
+public class PowerUp {
     protected float x, y;
     protected boolean active = true;
     protected boolean inUse = false;
@@ -17,11 +18,14 @@ public abstract class PowerUp {
     protected static final float INVISIBLE_DURATION = 5f;
     protected static final float USED_COOLDOWN = 10f;
 
-    public PowerUp(float x, float y, float duration, Texture[] textures) {
+    private PowerUpStrategy strategy;
+
+    public PowerUp(float x, float y, float duration, Texture[] textures, PowerUpStrategy strategy) {
         this.x = x;
         this.y = y;
         this.duration = duration;
         this.textures = textures;
+        this.strategy = strategy;
     }
 
     /**
@@ -33,12 +37,12 @@ public abstract class PowerUp {
      **/
     public final void ejecutar(float delta, Nave4 nave) {
         if (inUse) {
-            aplicarEfecto(nave, delta);  // Paso específico implementado por subclases
+            strategy.aplicarEfecto(nave, delta); //usamos la estrategia
             manejarDuracion(delta);    // Paso común
         } else {
             controlarVisibilidad(delta);  // Paso común
             if (active && debeActivarse(nave)) { // Paso "gancho"
-                activar(nave);              // Paso específico implementado por subclases
+                strategy.activar(nave);              // Paso específico implementado por subclases
                 inUse = true;
             }
         }
@@ -69,13 +73,10 @@ public abstract class PowerUp {
         }
     }
 
-    protected boolean debeActivarse(Nave4 nave) {
+    protected boolean debeActivarse(Nave4 nave)
+    {
         return nave.getBounds().overlaps(getBounds());
     }
-
-    // Pasos específicos que las subclases deben implementar
-    protected abstract void activar(Nave4 nave);        // Acción al activar el power-up
-    protected abstract void aplicarEfecto(Nave4 nave, float delta); // Acción continua mientras está activo
 
     public void draw(SpriteBatch batch) {
         if (active && textures.length > 0) {
@@ -84,7 +85,8 @@ public abstract class PowerUp {
     }
 
     // Métodos auxiliares comunes
-    public Rectangle getBounds() {
+    public Rectangle getBounds()
+    {
         return new Rectangle(x, y, textures[0].getWidth(), textures[0].getHeight());
     }
 
@@ -93,7 +95,8 @@ public abstract class PowerUp {
         y = random.nextInt(Gdx.graphics.getHeight() - 32);
     }
 
-    public boolean isActive() {
+    public boolean isActive()
+    {
         return active;
     }
 
@@ -103,5 +106,8 @@ public abstract class PowerUp {
         visibilityTimer = active ? VISIBLE_DURATION : USED_COOLDOWN;
     }
 
-    public abstract void update(float delta);
+    public void update(float delta)
+    {
+
+    }
 }
