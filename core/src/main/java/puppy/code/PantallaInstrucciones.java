@@ -41,7 +41,10 @@ public class PantallaInstrucciones implements Screen {
     private Texture pauseBackground;
     private boolean isPaused;
     private int seleccionActual = 0; // Mover seleccionActual a nivel de clase
-    private String[] opciones = {"Volver al juego", "Cambiar nave", "Salir"};
+    private String[] opciones = {"Volver al juego", "Cambiar nave", "Volver al menú"};
+
+    // Agregar instancia de ScreenManager
+    private ScreenManager screenManager;
 
     public PantallaInstrucciones(SpaceNavigation game, NaveSeleccionada naveSeleccionada, int ronda, int score,
                          int velXAsteroides, int velYAsteroides, int cantAsteroides) {
@@ -91,6 +94,9 @@ public class PantallaInstrucciones implements Screen {
             balls1.add(bb);
             balls2.add(bb);
         }
+
+        // Inicializar ScreenManager
+        screenManager = ScreenManager.getInstance(game);
     }
 
     public void dibujaEncabezado() {
@@ -191,26 +197,18 @@ public class PantallaInstrucciones implements Screen {
         if (nave.estaDestruido()) {
             if (score > game.getHighScore())
                 game.setHighScore(score);
-            Screen ss = new PantallaGameOver(game);
-            ss.resize(1280, 720);
-            game.setScreen(ss);
+            screenManager.showGameOverScreen(2);
             dispose();
         }
 
         batch.end();
 
         if(ronda == 1 && Gdx.input.isKeyPressed(Input.Keys.ENTER)){
-            Screen ss = new PantallaInstrucciones(game, game.getNaveSeleccionada(), ronda + 1, score,
-                velXAsteroides + 3, velYAsteroides + 3, cantAsteroides + 1);
-            ss.resize(1280, 720);
-            game.setScreen(ss);
+            screenManager.showNextRoundPractice(ronda + 1, score, velXAsteroides + 3, velYAsteroides + 3, cantAsteroides + 1);
             dispose();
         }
         if(ronda == 2 && balls1.size() == 0 && Gdx.input.isKeyPressed(Input.Keys.ENTER)){
-            Screen ss = new PantallaInstrucciones(game, game.getNaveSeleccionada(), ronda + 1, score,
-                velXAsteroides + 0, velYAsteroides + 0, cantAsteroides + 4);
-            ss.resize(1280, 720);
-            game.setScreen(ss);
+            screenManager.showNextRoundPractice(ronda + 1, score, velXAsteroides + 0, velYAsteroides + 0, cantAsteroides + 4);
             dispose();
         }
         if(ronda == 3 && balls1.size() == 0 && Gdx.input.isKeyPressed(Input.Keys.ENTER)){
@@ -250,9 +248,7 @@ public class PantallaInstrucciones implements Screen {
             font.draw(batch, "FELICIDADES\nTUTORIAL COMPLETADO", Gdx.graphics.getWidth() / 2- 100, Gdx.graphics.getHeight() / 2);
             batch.end();
             if( Gdx.input.isKeyPressed(Input.Keys.ENTER)){
-                Screen ss = new PantallaMenu(game);
-                ss.resize(1280, 720);
-                game.setScreen(ss);
+                screenManager.showMainMenu();
                 dispose();
             }
         }
@@ -285,12 +281,10 @@ public class PantallaInstrucciones implements Screen {
                         gameMusic.play();
                         break;
                     case 1: // "Cambiar nave"
-                        // Implementar la lógica para cambiar nave
+                        screenManager.showElegirNaveScreen();
                         break;
                     case 2: // "Salir"
-                        Screen ss = new PantallaMenu(game);
-                        ss.resize(1280, 720);
-                        game.setScreen(ss);
+                        screenManager.showMainMenu();
                         dispose();
                         break;
                 }
@@ -312,14 +306,5 @@ public class PantallaInstrucciones implements Screen {
     public void dispose() {
         explosionSound.dispose();
         gameMusic.dispose();
-        /* Liberación adicional de recursos de texturas y sonidos de la nave y asteroides
-        nave.dispose();
-        for (Ball2 ball : balls1) {
-            ball.dispose();
-        }
-        for (Bullet bala : balas) {
-            bala.dispose();
-        }
-         */
     }
 }

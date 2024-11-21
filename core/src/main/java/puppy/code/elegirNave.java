@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 
 public class elegirNave implements Screen {
     private final SpaceNavigation game;
@@ -14,6 +15,10 @@ public class elegirNave implements Screen {
     private Texture naveImagen;
     private Sound cambioNaveSound;
     private int indiceNaveActual = 0;
+    Texture pauseBackground;
+    private int seleccionActual = 0;
+    private String[] opciones = {"Volver a la selección", "Cambiar nave", "Volver al menú"};
+    private boolean isPaused;
 
     private Nave[] naves = {
         new Nave("Falcon", 3, 5, "MainShip.png",
@@ -32,6 +37,8 @@ public class elegirNave implements Screen {
         camera.setToOrtho(false, 800, 480);
         cargarNave(indiceNaveActual);
         cambioNaveSound = Gdx.audio.newSound(Gdx.files.internal("slash.mp3"));
+        pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
+        this.isPaused = false;
     }
 
     // Clase Nave para almacenar los datos de cada nave
@@ -56,7 +63,22 @@ public class elegirNave implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);  // Limpia la pantalla
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Pausar o reanudar música si se presiona ESC
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            isPaused = !isPaused;
+            if (isPaused) {
+                //gameMusic.pause();
+            } else {
+                //gameMusic.play();
+            }
+        }
+
+        if (isPaused) {
+            pause();
+            return;
+        }
 
         camera.update();
         game.getBatch().setProjectionMatrix(camera.combined);
@@ -86,7 +108,7 @@ public class elegirNave implements Screen {
         }
 
         // Seleccionar la nave actual con Enter
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             System.out.println("Nave seleccionada: " + naves[indiceNaveActual].nombre);
             cambiarNave(naves[indiceNaveActual].vida, naves[indiceNaveActual].speed, naves[indiceNaveActual].texturaNave,
                 naves[indiceNaveActual].texturaShoot, naves[indiceNaveActual].soundShoot);
@@ -113,7 +135,50 @@ public class elegirNave implements Screen {
 
     @Override public void show() {}
     @Override public void hide() {}
-    @Override public void pause() {}
+    @Override public void pause() {
+        game.getBatch().begin();
+        game.getBatch().draw(pauseBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        // Dibujar las opciones del menú
+        for (int i = 0; i < opciones.length; i++) {
+            if (i == seleccionActual) {
+                // Resaltar la opción seleccionada
+                game.getFont().draw(game.getBatch(), "> " + opciones[i], 500, 400 - i * 50);
+            } else {
+                game.getFont().draw(game.getBatch(), opciones[i], 500, 400 - i * 50);
+            }
+        }
+
+        // Navegación de opciones con las teclas de flecha
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            seleccionActual = (seleccionActual - 1 + opciones.length) % opciones.length;
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            seleccionActual = (seleccionActual + 1) % opciones.length;
+        }
+
+        // Seleccionar opción con la tecla Enter
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            switch (seleccionActual) {
+                case 0: // "Volver al juego"
+                    isPaused = false;
+                    //gameMusic.play();
+                    break;
+                case 1: // "Cambiar nave"
+                    // Implementar la lógica para cambiar nave
+                    break;
+                case 2: // "Salir"
+                    Screen ss = new PantallaMenu(game);
+                    ss.resize(1280, 720);
+                    game.setScreen(ss);
+                    dispose();
+                    break;
+            }
+        }
+
+        // Dibuja el encabezado "PAUSA"
+        game.getFont().draw(game.getBatch(), "PAUSA", Gdx.graphics.getWidth() / 2 - 50, Gdx.graphics.getHeight() - 100);
+        game.getBatch().end();
+    }
     @Override public void resume() {}
 
     void cambiarNave(int vida, int speed, String texturaNave, String texturaShoot, String soundShoot) {

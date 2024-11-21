@@ -16,6 +16,9 @@ public class SpaceNavigation extends Game {
     private int highScore;
     private NaveSeleccionada naveSeleccionada; // Atributo para almacenar la nave seleccionada
 
+    // Agregar instancia de ScreenManager
+    private ScreenManager screenManager;
+
     public void create() {
         batch = new SpriteBatch();
         font = new BitmapFont(); // Usa Arial font por defecto
@@ -24,7 +27,11 @@ public class SpaceNavigation extends Game {
         loadHighScore(); // Carga el high score al inicio
         naveSeleccionada = new NaveSeleccionada(3, 3, "MainShip.png",
             "Rocket2.png", "pop-sound.mp3"); // Inicializa con valores predeterminados o vacíos
-        setScreen(new PantallaMenu(this)); // Muestra el menú principal
+        // Inicializar ScreenManager
+        screenManager = ScreenManager.getInstance(this);
+
+        // Mostrar la pantalla del menú principal usando ScreenManager
+        screenManager.showMainMenu();
     }
 
     @Override

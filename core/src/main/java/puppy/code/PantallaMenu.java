@@ -17,11 +17,15 @@ public class PantallaMenu implements Screen {
     private String[] opciones = {"Jugar", "Aprender a jugar", "Elegir Nave", "Cerrar Juego"};
     private int seleccionActual = 0; // Índice de la opción seleccionada actualmente
 
+    // Agregar instancia de ScreenManager
+    private ScreenManager screenManager;
+
     public PantallaMenu(SpaceNavigation game) {
         this.game = game;
-
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1280, 720);
+        // Inicializar ScreenManager
+        screenManager = ScreenManager.getInstance(game);
     }
 
     @Override
@@ -60,16 +64,15 @@ public class PantallaMenu implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (seleccionActual) {
                 case 0: // "Jugar"
-                    game.setScreen(new PantallaJuego(game, game.getNaveSeleccionada(), 1, 0, 1, 1, 10));
+                    screenManager.showGameScreen();
                     dispose();
                     break;
                 case 1: // "Aprender a jugar"
-                    // Se podría implementar una pantalla adicional para mostrar instrucciones
-                    game.setScreen(new PantallaInstrucciones(game, game.getNaveSeleccionada(), 1, 0, 0, 0, 0));
+                    screenManager.showPracticeScreen();
                     dispose();
                     break;
                 case 2:
-                    game.setScreen(new elegirNave(game));
+                    screenManager.showElegirNaveScreen();
                     dispose();
                     break;
                 case 3: // "Cerrar Juego"

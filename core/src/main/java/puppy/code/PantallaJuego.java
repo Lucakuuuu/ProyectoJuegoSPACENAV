@@ -3,7 +3,6 @@ package puppy.code;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -41,8 +40,11 @@ public class PantallaJuego implements Screen {
     private Texture pauseBackground;
     private boolean isPaused;
     private int seleccionActual = 0;
-    private String[] opciones = {"Volver al juego", "Cambiar nave", "Salir"};
+    private String[] opciones = {"Volver al juego", "Cambiar nave", "Volver al menú"};
     private ArrayList<Updatable> updatables;
+
+    // Agregar instancia de ScreenManager
+    private ScreenManager screenManager;
 
     public PantallaJuego(SpaceNavigation game, NaveSeleccionada naveSeleccionada, int ronda, int score,
                          int velXAsteroides, int velYAsteroides, int cantAsteroides) {
@@ -105,6 +107,9 @@ public class PantallaJuego implements Screen {
             balls1.add(bb);
             balls2.add(bb);
         }
+
+        // Inicializar ScreenManager
+        screenManager = ScreenManager.getInstance(game);
     }
 
     private float generateRandomX() {
@@ -144,17 +149,6 @@ public class PantallaJuego implements Screen {
         }
 
         batch.begin();
-        /*
-        for (Updatable updatable : updatables) {
-            updatable.update(delta);
-
-            // Verifica si el objeto es un PowerUp y llámalo para que se dibuje
-            if (updatable instanceof PowerUp) {
-                ((PowerUp) updatable).draw(batch);
-            }
-        }
-
-         */
         dibujaEncabezado();
 
         for (Updatable updatable : updatables) {
@@ -214,9 +208,8 @@ public class PantallaJuego implements Screen {
             if (score > game.getHighScore()) {
                 game.setHighScore(score);
             }
-            Screen ss = new PantallaGameOver(game);
-            ss.resize(1280, 720);
-            game.setScreen(ss);
+            gameMusic.stop();
+            screenManager.showGameOverScreen(1);
             dispose();
         }
 
@@ -224,10 +217,7 @@ public class PantallaJuego implements Screen {
 
         // Pasar a la siguiente ronda si todos los asteroides fueron eliminados
         if (balls1.size() == 0) {
-            Screen ss = new PantallaJuego(game, game.getNaveSeleccionada(), ronda + 1, score,
-                velXAsteroides + 3, velYAsteroides + 3, cantAsteroides + 10);
-            ss.resize(1280, 720);
-            game.setScreen(ss);
+            screenManager.showNextRoundGame(ronda + 1, score, velXAsteroides + 3, velYAsteroides + 3, cantAsteroides + 10);
             dispose();
         }
     }
@@ -272,12 +262,11 @@ public class PantallaJuego implements Screen {
                     gameMusic.play();
                     break;
                 case 1: // "Cambiar nave"
-                    // Implementar la lógica para cambiar nave
+                    screenManager.showElegirNaveScreen();
+                    dispose();
                     break;
                 case 2: // "Salir"
-                    Screen ss = new PantallaMenu(game);
-                    ss.resize(1280, 720);
-                    game.setScreen(ss);
+                    screenManager.showMainMenu();
                     dispose();
                     break;
             }
@@ -297,15 +286,5 @@ public class PantallaJuego implements Screen {
     @Override
     public void dispose() {
         explosionSound.dispose();
-        gameMusic.dispose();
-        /* Liberación adicional de recursos de texturas y sonidos de la nave y asteroides
-        nave.dispose();
-        for (Ball2 ball : balls1) {
-            ball.dispose();
-        }
-        for (Bullet bala : balas) {
-            bala.dispose();
-        }
-         */
     }
 }
