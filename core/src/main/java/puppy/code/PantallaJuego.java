@@ -93,12 +93,12 @@ public class PantallaJuego implements Screen {
 
         // Inicializar la nave en el centro de la pantalla
         nave = new Nave4(Gdx.graphics.getWidth() / 2 - 50, 30,
-            new Texture(Gdx.files.internal(naveSeleccionada.texturaNave)),
+            new Texture(Gdx.files.internal(naveSeleccionada.getTexturaNave())),
             Gdx.audio.newSound(Gdx.files.internal("hurt.ogg")),
-            new Texture(Gdx.files.internal(naveSeleccionada.texturaShoot)),
-            Gdx.audio.newSound(Gdx.files.internal(naveSeleccionada.soundShoot)),
-            naveSeleccionada.speed);
-        nave.setVidas(naveSeleccionada.vida);
+            new Texture(Gdx.files.internal(naveSeleccionada.getTexturaShoot())),
+            Gdx.audio.newSound(Gdx.files.internal(naveSeleccionada.getSoundShoot())),
+            naveSeleccionada.getSpeed());
+        nave.setVidas(naveSeleccionada.getVida());
 
         // Crear asteroides dentro de los límites de la pantalla y con velocidades iniciales no nulas
         Random r = new Random();

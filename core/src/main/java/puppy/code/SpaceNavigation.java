@@ -14,29 +14,37 @@ public class SpaceNavigation extends Game {
     private SpriteBatch batch;
     private BitmapFont font;
     private int highScore;
-    private NaveSeleccionada naveSeleccionada; // Atributo para almacenar la nave seleccionada
+    private NaveSeleccionada naveSeleccionada; // Almacena la nave seleccionada
+    private ScreenManager screenManager; // Singleton para manejar pantallas
 
-    // Agregar instancia de ScreenManager
-    private ScreenManager screenManager;
-
+    @Override
     public void create() {
+        // Inicialización
         batch = new SpriteBatch();
-        font = new BitmapFont(); // Usa Arial font por defecto
+        font = new BitmapFont();
         font.getData().setScale(2f);
 
-        loadHighScore(); // Carga el high score al inicio
-        naveSeleccionada = new NaveSeleccionada(3, 3, "MainShip.png",
-            "Rocket2.png", "pop-sound.mp3"); // Inicializa con valores predeterminados o vacíos
-        // Inicializar ScreenManager
-        screenManager = ScreenManager.getInstance(this);
+        // Cargar High Score
+        loadHighScore();
 
-        // Mostrar la pantalla del menú principal usando ScreenManager
-        screenManager.showMainMenu();
+        // Inicializar la nave seleccionada con el Builder
+        naveSeleccionada = new NaveSeleccionada.Builder()
+            .setNombre("Default Ship")
+            .setVida(3)
+            .setSpeed(3)
+            .setTexturaNave("MainShip.png")
+            .setTexturaShoot("Rocket2.png")
+            .setSoundShoot("pop-sound.mp3")
+            .build();
+
+        // Configurar ScreenManager
+        screenManager = ScreenManager.getInstance(this);
+        screenManager.showMainMenu(); // Mostrar menú principal
     }
 
     @Override
     public void render() {
-        super.render();
+        super.render(); // Llama al renderizado de la pantalla activa
     }
 
     @Override
@@ -45,6 +53,7 @@ public class SpaceNavigation extends Game {
         font.dispose();
     }
 
+    // Getters
     public SpriteBatch getBatch() {
         return batch;
     }
@@ -53,11 +62,15 @@ public class SpaceNavigation extends Game {
         return font;
     }
 
-    // Getter y Setter para el high score
     public int getHighScore() {
         return highScore;
     }
 
+    public NaveSeleccionada getNaveSeleccionada() {
+        return naveSeleccionada;
+    }
+
+    // Setters
     public void setHighScore(int score) {
         if (score > highScore) {
             highScore = score;
@@ -65,7 +78,11 @@ public class SpaceNavigation extends Game {
         }
     }
 
-    // Métodos para guardar y cargar el high score usando Preferences
+    public void setNaveSeleccionada(NaveSeleccionada naveSeleccionada) {
+        this.naveSeleccionada = naveSeleccionada;
+    }
+
+    // Manejo de High Score con Preferences
     private void saveHighScore() {
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
         prefs.putInteger(HIGH_SCORE_KEY, highScore);
@@ -74,24 +91,14 @@ public class SpaceNavigation extends Game {
 
     private void loadHighScore() {
         Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
-        highScore = prefs.getInteger(HIGH_SCORE_KEY, 0); // Cargar o iniciar en 0 si no existe
+        highScore = prefs.getInteger(HIGH_SCORE_KEY, 0); // Por defecto, inicia en 0
     }
 
-    // Método auxiliar para cambiar la pantalla
+    // Cambio de pantallas con manejo de recursos
     public void changeScreen(Screen newScreen) {
         if (getScreen() != null) {
-            getScreen().dispose(); // Libera la pantalla actual
+            getScreen().dispose(); // Libera recursos de la pantalla anterior
         }
-        setScreen(newScreen); // Cambia a la nueva pantalla
-    }
-
-    // Getter y Setter para naveSeleccionada
-    public NaveSeleccionada getNaveSeleccionada() {
-        return naveSeleccionada;
-    }
-
-    public void setNaveSeleccionada(NaveSeleccionada naveSeleccionada) {
-        this.naveSeleccionada = naveSeleccionada;
+        setScreen(newScreen);
     }
 }
-

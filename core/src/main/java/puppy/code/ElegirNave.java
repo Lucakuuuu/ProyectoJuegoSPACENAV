@@ -7,61 +7,67 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 
 public class elegirNave implements Screen {
+
     private final SpaceNavigation game;
+    private final Texture pauseBackground;
     private OrthographicCamera camera;
     private Texture naveImagen;
     private Sound cambioNaveSound;
     private int indiceNaveActual = 0;
-    Texture pauseBackground;
+    private NaveSeleccionada[] naves;
+    ScreenManager screenManager;
     private int seleccionActual = 0;
     private String[] opciones = {"Volver a la selección", "Volver al menú"};
     private boolean isPaused;
-    private ScreenManager screenManager;
-
-    private Nave[] naves = {
-        new Nave("Falcon", 3, 5, "MainShip.png",
-            "Rocket2.png", "pop-sound.mp3"),
-
-        new Nave("Explorer", 6, 2, "Ship_2.png",
-            "Ship_2_shoot.png", "shoot 3.mp3"),
-
-        new Nave("Sonic", 1, 10, "Ship_3.png",
-            "Ship_3_shoot.png", "shoot 3.mp3")
-    };
 
     public elegirNave(SpaceNavigation game) {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
+
+        // Inicializar naves con Builder
+        naves = new NaveSeleccionada[]{
+            new NaveSeleccionada.Builder()
+                .setNombre("Falcon")
+                .setVida(3)
+                .setSpeed(5)
+                .setTexturaNave("MainShip.png")
+                .setTexturaShoot("Rocket2.png")
+                .setSoundShoot("pop-sound.mp3")
+                .build(),
+            new NaveSeleccionada.Builder()
+                .setNombre("Explorer")
+                .setVida(6)
+                .setSpeed(2)
+                .setTexturaNave("Ship_2.png")
+                .setTexturaShoot("Ship_2_shoot.png")
+                .setSoundShoot("shoot 3.mp3")
+                .build(),
+            new NaveSeleccionada.Builder()
+                .setNombre("Sonic")
+                .setVida(1)
+                .setSpeed(10)
+                .setTexturaNave("Ship_3.png")
+                .setTexturaShoot("Ship_3_shoot.png")
+                .setSoundShoot("shoot 3.mp3")
+                .build()
+        };
+
         cargarNave(indiceNaveActual);
         cambioNaveSound = Gdx.audio.newSound(Gdx.files.internal("slash.mp3"));
-        pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
-        this.isPaused = false;
         // Inicializar ScreenManager
         screenManager = ScreenManager.getInstance(game);
+        this.pauseBackground = new Texture(Gdx.files.internal("pause_background.png"));
+        this.isPaused = false;
     }
 
-    // Clase Nave para almacenar los datos de cada nave
-    class Nave {
-        String nombre;
-        int vida;
-        int speed;
-        String texturaNave;
-        String texturaShoot;
-        public String soundShoot;
-
-        public Nave(String nombre, int vida, int speed, String texturaNave,
-                    String texturaShoot, String soundShoot) {
-            this.nombre = nombre;
-            this.vida = vida;
-            this.speed = speed;
-            this.texturaNave = texturaNave;
-            this.texturaShoot = texturaShoot;
-            this.soundShoot = soundShoot;
+    private void cargarNave(int indice) {
+        if (naveImagen != null) {
+            naveImagen.dispose();
         }
+        naveImagen = new Texture(Gdx.files.internal(naves[indice].getTexturaNave()));
     }
 
     @Override
@@ -87,19 +93,16 @@ public class elegirNave implements Screen {
         game.getBatch().setProjectionMatrix(camera.combined);
 
         game.getBatch().begin();
-
-        // Dibuja la imagen de la nave en el centro
-        game.getBatch().draw(naveImagen, 300, 150, 200, 200);
-
-        // Dibuja el título y la información de la nave
-        game.getFont().draw(game.getBatch(), "Nave " + (indiceNaveActual + 1) + " / " + naves.length, 50, 450);
-        game.getFont().draw(game.getBatch(), "Nombre: " + naves[indiceNaveActual].nombre, 50, 400);
-        game.getFont().draw(game.getBatch(), "Vida: " + naves[indiceNaveActual].vida, 50, 370);
-        game.getFont().draw(game.getBatch(), "Velocidad: " + naves[indiceNaveActual].speed, 50, 340);
-
+        // Dibujar la nave y su información
+        game.getBatch().draw(naveImagen, 300, 50, 200, 200);
+        game.getFont().draw(game.getBatch(), "Selección de Naves", 300, 450);
+        game.getFont().draw(game.getBatch(), "Para seleccionar una nave, Presiona ENTER", 300, 420);
+        game.getFont().draw(game.getBatch(), "Nombre: " + naves[indiceNaveActual].getNombre(), 300, 380);
+        game.getFont().draw(game.getBatch(), "Vida: " + naves[indiceNaveActual].getVida(), 300, 340);
+        game.getFont().draw(game.getBatch(), "Velocidad: " + naves[indiceNaveActual].getSpeed(), 300, 300);
         game.getBatch().end();
 
-        // Navegar entre naves usando las flechas derecha e izquierda
+        // Navegar entre naves
         if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
             indiceNaveActual = (indiceNaveActual + 1) % naves.length;
             cargarNave(indiceNaveActual);
@@ -110,19 +113,12 @@ public class elegirNave implements Screen {
             cambioNaveSound.play();
         }
 
-        // Seleccionar la nave actual con Enter
+        // Seleccionar la nave actual
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            System.out.println("Nave seleccionada: " + naves[indiceNaveActual].nombre);
-            cambiarNave(naves[indiceNaveActual].vida, naves[indiceNaveActual].speed, naves[indiceNaveActual].texturaNave,
-                naves[indiceNaveActual].texturaShoot, naves[indiceNaveActual].soundShoot);
+            NaveSeleccionada naveActual = naves[indiceNaveActual];
+            game.setNaveSeleccionada(naveActual);
+            screenManager.showMainMenu();
         }
-    }
-
-    private void cargarNave(int indice) {
-        if (naveImagen != null) {
-            naveImagen.dispose();
-        }
-        naveImagen = new Texture(Gdx.files.internal(naves[indice].texturaNave));
     }
 
     @Override
@@ -136,9 +132,12 @@ public class elegirNave implements Screen {
         if (cambioNaveSound != null) cambioNaveSound.dispose();
     }
 
-    @Override public void show() {}
-    @Override public void hide() {}
-    @Override public void pause() {
+    @Override
+    public void show() {}
+    @Override
+    public void hide() {}
+    @Override
+    public void pause() {
         game.getBatch().begin();
         game.getBatch().draw(pauseBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -164,7 +163,6 @@ public class elegirNave implements Screen {
             switch (seleccionActual) {
                 case 0: // "Volver al juego"
                     isPaused = false;
-                    //gameMusic.play();
                     break;
                 case 1: // "Salir"
                     screenManager.showMainMenu();
@@ -177,13 +175,6 @@ public class elegirNave implements Screen {
         game.getFont().draw(game.getBatch(), "PAUSA", Gdx.graphics.getWidth() / 2 - 50, Gdx.graphics.getHeight() - 100);
         game.getBatch().end();
     }
-    @Override public void resume() {}
-
-    void cambiarNave(int vida, int speed, String texturaNave, String texturaShoot, String soundShoot) {
-
-        NaveSeleccionada naveSeleccionada = new NaveSeleccionada(vida, speed, texturaNave,
-            texturaShoot, soundShoot);
-        game.setNaveSeleccionada(naveSeleccionada);
-        screenManager.showMainMenu();
-    }
+    @Override
+    public void resume() {}
 }
