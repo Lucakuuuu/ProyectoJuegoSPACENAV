@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 import static com.badlogic.gdx.math.MathUtils.random;
 import strategies.PowerUpStrategy;
 
-public class PowerUp {
+public abstract class PowerUp {
     protected float x, y;
     protected boolean active = true;
     protected boolean inUse = false;
@@ -29,7 +29,7 @@ public class PowerUp {
     }
 
     /**
-     * Método Template que define el flujo completo de un power-up:
+     * Método Template que define un power-up:
      * - Control de visibilidad
      * - Activación del efecto
      * - Aplicación del efecto
@@ -106,8 +106,5 @@ public class PowerUp {
         visibilityTimer = active ? VISIBLE_DURATION : USED_COOLDOWN;
     }
 
-    public void update(float delta)
-    {
-
-    }
+    public void update(float delta) {}
 }
